@@ -4,15 +4,15 @@
 #Include "RESTFul.ch"
 #Include "TopConn.ch"
 
-@Get("/faturamento") // Alterei o endpoint para ser mais genérico
+@Get("/faturamento") // Alterei o endpoint para ser mais genÃ©rico
 Function u_faturamento()
   Local jResponse    := JsonObject():New()
   Local aJson        := {}
-  Local jQueryString := oRest:getQueryRequest() // Obtém os parâmetros da URL
+  Local jQueryString := oRest:getQueryRequest() // ObtÃ©m os parÃ¢metros da URL
   Local cQuery       := Nil
   
-  // 1. Extração dos Parâmetros da URL
-  // O objeto jQueryString contém os parâmetros (mes, ano)
+  // 1. ExtraÃ§Ã£o dos ParÃ¢metros da URL
+  // O objeto jQueryString contÃ©m os parÃ¢metros (mes, ano)
   Local cMes         := jQueryString["mes"] // Ex: "05"
   Local cAno         := jQueryString["ano"] // Ex: "2024"
   Local cWhere       := "Where D_E_L_E_T_ = '' "
@@ -22,27 +22,27 @@ Function u_faturamento()
 		TRB1->(dbCloseArea("TRB1"))
 	EndIf
 
-  // 2. Construção Dinâmica da Cláusula WHERE
+  // 2. ConstruÃ§Ã£o DinÃ¢mica da ClÃ¡usula WHERE
   
-  // Filtro por Ano (crucial para o RAG, caso ele peça o faturamento trimestral de 2024)
+  // Filtro por Ano (crucial para o RAG, caso ele peÃ§a o faturamento trimestral de 2024)
   If !Empty(cAno)
      cWhere += "And SUBSTRING(E1_VENCTO, 1,4) = '"+cAno+"' "
   Endif
   
-  // Filtro por Mês (para focar em um mês específico, ou deixar amplo para a agregação)
+  // Filtro por MÃªs (para focar em um mÃªs especÃ­fico, ou deixar amplo para a agregaÃ§Ã£o)
   If !Empty(cMes)
      cWhere += "And SUBSTRING(E1_VENCTO, 5,2) = '"+cMes+"' "
   Endif
 
-  // Ajusta a consulta para sempre agrupar por mês/ano, aplicando o filtro dinâmico
+  // Ajusta a consulta para sempre agrupar por mÃªs/ano, aplicando o filtro dinÃ¢mico
   cQuery := "Select SUBSTRING(E1_VENCTO, 1,4) Ano, SUBSTRING(E1_VENCTO, 5,2) Mes, SUM(E1_Valor) Valor, SUM(E1_Saldo) Saldo "
-  cQuery += "From Se1010 "
+  cQuery += "From Se1*** " // Colocar o nÃºmero da empresa
   cQuery += cWhere
-  cQuery += "Group By SUBSTRING(E1_VENCTO, 1,4), SUBSTRING(E1_VENCTO, 5,2) " // Agrupamento por Ano e Mês
+  cQuery += "Group By SUBSTRING(E1_VENCTO, 1,4), SUBSTRING(E1_VENCTO, 5,2) " // Agrupamento por Ano e MÃªs
   cQuery += "Order By SUBSTRING(E1_VENCTO, 1,4), SUBSTRING(E1_VENCTO, 5,2)"
   
-  // ... (o restante do código para PlsQuery e montagem do JSON)
-  // 3. Execução da Consulta Dinâmica e Retorno do JSON
+  // ... (o restante do cÃ³digo para PlsQuery e montagem do JSON)
+  // 3. ExecuÃ§Ã£o da Consulta DinÃ¢mica e Retorno do JSON
   
   PlsQuery(cQuery,"TRB1")
   dbSelectArea("TRB1")
