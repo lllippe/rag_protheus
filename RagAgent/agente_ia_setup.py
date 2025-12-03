@@ -21,7 +21,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", api_key=GEMINI_API_KEY)
 
 # 2. A Ferramenta (Argumento 'tools')
 tools = [
-    StructuredTool.from_function( # NOVO: Usando StructuredTool
+    StructuredTool.from_function( #Usando StructuredTool
         func=protheus_faturamento_mensal,
         name="faturamento_mensal",
         description="Use para obter dados financeiros mensais do ERP Protheus. O Agente deve garantir que os parâmetros 'mes' (MM) e 'ano' (YYYY) sejam extraídos corretamente.",
