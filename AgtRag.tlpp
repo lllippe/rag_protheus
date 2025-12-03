@@ -1,0 +1,67 @@
+#include 'tlpp-core.th'
+#include 'tlpp-rest.th'
+#Include "Totvs.ch"
+#Include "RESTFul.ch"
+#Include "TopConn.ch"
+
+@Get("/faturamento") // Alterei o endpoint para ser mais genérico
+Function u_faturamento()
+  Local jResponse    := JsonObject():New()
+  Local aJson        := {}
+  Local jQueryString := oRest:getQueryRequest() // Obtém os parâmetros da URL
+  Local cQuery       := Nil
+  
+  // 1. Extração dos Parâmetros da URL
+  // O objeto jQueryString contém os parâmetros (mes, ano)
+  Local cMes         := jQueryString["mes"] // Ex: "05"
+  Local cAno         := jQueryString["ano"] // Ex: "2024"
+  Local cWhere       := "Where D_E_L_E_T_ = '' "
+ 
+  If (Select("TRB1") <> 0) 
+		dbSelectArea("TRB1") 
+		TRB1->(dbCloseArea("TRB1"))
+	EndIf
+
+  // 2. Construção Dinâmica da Cláusula WHERE
+  
+  // Filtro por Ano (crucial para o RAG, caso ele peça o faturamento trimestral de 2024)
+  If !Empty(cAno)
+     cWhere += "And SUBSTRING(E1_VENCTO, 1,4) = '"+cAno+"' "
+  Endif
+  
+  // Filtro por Mês (para focar em um mês específico, ou deixar amplo para a agregação)
+  If !Empty(cMes)
+     cWhere += "And SUBSTRING(E1_VENCTO, 5,2) = '"+cMes+"' "
+  Endif
+
+  // Ajusta a consulta para sempre agrupar por mês/ano, aplicando o filtro dinâmico
+  cQuery := "Select SUBSTRING(E1_VENCTO, 1,4) Ano, SUBSTRING(E1_VENCTO, 5,2) Mes, SUM(E1_Valor) Valor, SUM(E1_Saldo) Saldo "
+  cQuery += "From Se1010 "
+  cQuery += cWhere
+  cQuery += "Group By SUBSTRING(E1_VENCTO, 1,4), SUBSTRING(E1_VENCTO, 5,2) " // Agrupamento por Ano e Mês
+  cQuery += "Order By SUBSTRING(E1_VENCTO, 1,4), SUBSTRING(E1_VENCTO, 5,2)"
+  
+  // ... (o restante do código para PlsQuery e montagem do JSON)
+  // 3. Execução da Consulta Dinâmica e Retorno do JSON
+  
+  PlsQuery(cQuery,"TRB1")
+  dbSelectArea("TRB1")
+	TRB1->(dbGoTop())
+
+  While !TRB1->(Eof())
+    Aadd(aJson,JsonObject():new())
+    nPos := Len(aJson)
+    aJson[nPos]['ano']        := TRB1->Ano
+    aJson[nPos]['mes']        := TRB1->Mes
+    aJson[nPos]['valor']      := TRB1->Valor
+    aJson[nPos]['saldo']      := TRB1->Saldo
+    TRB1->(DbSkip())
+  Enddo
+
+  TRB1->(DbCloseArea())
+
+  jResponse:set(aJson)
+  oRest:setKeyHeaderResponse('Content-Type','application/json')
+  oRest:setResponse(jResponse:toJSON())
+
+Return .T.
