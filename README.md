@@ -6,7 +6,10 @@ Este projeto demonstra a criação de um **Agente RAG (Retrieval Augmented Gener
 
 O objetivo é traduzir consultas de negócios complexas (ex: "Qual foi o faturamento do último trimestre de 2024?") em chamadas de API otimizadas, processar os dados financeiros e devolver uma resposta coesa em linguagem natural para uma aplicação frontend (como o **Flutter**).
 
-🏗️ Arquitetura do Sistema (Visão Geral)O fluxo de dados e raciocínio é gerenciado pelo **Agente de IA**, que atua como um tradutor e processador de dados:
+🏗️ **Arquitetura do Sistema (Visão Geral)**
+
+O fluxo de dados e raciocínio é gerenciado pelo **Agente de IA**, que atua como um tradutor e processador de dados:
+
 1. **Frontend (Flutter)**: Envia a pergunta do usuário para o FastAPI.
 2. **Servidor RAG (FastAPI/LangChain)**: O Gemini decide quando e como usar a ferramenta.
 3. **Ferramenta AdvPL (Python)**: Faz a chamada REST otimizada ao Protheus/AdvPL.
