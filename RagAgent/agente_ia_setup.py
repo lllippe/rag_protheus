@@ -1,5 +1,3 @@
-# agente_ia_setup.py (SOLUÇÃO FINAL)
-
 import os
 from langchain_core.tools import StructuredTool # Substitui a importação do Tool
 from pydantic import BaseModel, Field # Necessário para definir a estrutura
